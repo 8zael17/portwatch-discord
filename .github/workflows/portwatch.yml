@@ -1,0 +1,37 @@
+name: PortWatch update
+
+on:
+  schedule:
+    - cron: "0 */3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-dejavu-core
+          pip install -r requirements.txt
+
+      - name: Actualizar mensaje en Discord
+        run: python update.py
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Guardar estado
+        run: |
+          git config user.name "portwatch-bot"
+          git config user.email "portwatch-bot@users.noreply.github.com"
+          git add state.json
+          git diff --cached --quiet || (git commit -m "Guardar ID del mensaje" && git push)
