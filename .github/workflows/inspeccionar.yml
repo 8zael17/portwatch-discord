@@ -1,0 +1,22 @@
+name: Inspeccionar datos
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ver:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mostrar estructura
+        run: |
+          curl -sL https://portwatch-vi.xyz/data/tracker.json -o t.json
+          python3 - << 'PY'
+          import json
+          d = json.load(open("t.json"))
+          print("CLAVES:", list(d.keys()))
+          e = d.get("efforts") or []
+          print("PROYECTOS:", len(e))
+          for x in e[:1]:
+              print(json.dumps(x, indent=1)[:3500])
+          print("EXE:", json.dumps(d.get("exe"))[:500])
+          PY
